@@ -6,7 +6,7 @@ from src.models.comment import Comment
 
 
 class Post(Base):
-    title = StringField(required=True, unique=True, max_length=10)
+    title = StringField(required=True, unique=True, max_length=100)
     content = StringField(required=True)
     # when user deleted, author will be null
     author = ReferenceField(User, reverse_delete_rule=NULLIFY)
