@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash
 from src.common.utils import updateDocFields
@@ -56,6 +57,7 @@ class UserApi(Resource):
                     target['password'] = generate_password_hash(value)
                 else:
                     target[key] = value
+        target['updatedTime'] = datetime.utcnow()
         saved = target.save()
         user = updateDocFields(saved)
         return user, 200

@@ -4,6 +4,7 @@ from flask_restful import Api
 from flask_cors import CORS
 from mongoengine import connect
 from src.api.user import UsersApi, UserApi
+from src.api.auth import LoginApi
 
 app = Flask(__name__)
 # cors
@@ -17,6 +18,7 @@ api = Api(app)
 
 api.add_resource(UsersApi, '/api/users')
 api.add_resource(UserApi, '/api/users/<string:id>')
+api.add_resource(LoginApi, '/api/login')
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

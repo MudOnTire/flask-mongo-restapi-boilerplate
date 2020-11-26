@@ -1,4 +1,8 @@
 import json
+import jwt
+from datetime import datetime
+
+secret = 'Simple is better than complex'
 
 
 def updateDocFields(doc):
@@ -20,3 +24,21 @@ def updateDocFields(doc):
     if 'password' in dic:
         del dic['password']
     return dic
+
+
+def createToken(id):
+    token = jwt.encode(
+        {
+            'id': id,
+            'exp': datetime.utcnow() + datetime.timedelta(hours=24)
+        },
+        secret,
+        algorithm='HS256')
+    return token
+
+
+def verifyToken(token):
+    try:
+        return jwt.decode(token, secret, algorithm='HS256')
+    except jwt.ExpiredSignatureError:
+        print('token expired')

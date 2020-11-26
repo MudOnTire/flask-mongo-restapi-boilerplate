@@ -12,6 +12,7 @@ mongoengine = "*"
 flask-restful = "*"
 flask-compress = "*"
 flask-cors = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.8"
