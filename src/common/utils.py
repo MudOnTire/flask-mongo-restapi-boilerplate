@@ -1,9 +1,22 @@
 import json
 
 
-def liftDocId(doc):
-    docObj = json.loads(doc.to_json())
-    id = docObj["_id"]["$oid"]
-    docObj["id"] = id
-    del docObj["_id"]
-    return docObj
+def updateDocFields(doc):
+    dic = json.loads(doc.to_json())
+    # id
+    id = dic["_id"]["$oid"]
+    dic["id"] = id
+    del dic["_id"]
+    # date
+    created = dic["createdTime"]["$date"]
+    dic["createdTime"] = created
+    updated = dic["updatedTime"]["$date"]
+    dic["updatedTime"] = updated
+    # deleted
+    del dic["deleted"]
+    # cls
+    del dic["_cls"]
+    # password
+    if 'password' in dic:
+        del dic['password']
+    return dic
