@@ -1,8 +1,9 @@
 import logging
 from flask_restful import Resource, reqparse
+from werkzeug.security import generate_password_hash
 from src.common.utils import liftDocId
 
-from models.user import User
+from src.models.user import User
 
 # get
 get_args = reqparse.RequestParser()
@@ -34,6 +35,7 @@ class UsersApi(Resource):
             (page_index - 1) * page_size).limit(page_size)
         for db_user in db_users:
             user = liftDocId(db_user)
+            del (user['password'])
             users.append(user)
         res = {
             'list': users,
@@ -48,8 +50,11 @@ class UsersApi(Resource):
     # create
     def post(self):
         args = post_args.parse_args()
+        hashed_pass = generate_password_hash(args['password'])
         new_user = User(name=args['name'],
-                        password=args['password'],
+                        password=hashed_pass,
                         role=args['role'])
         saved = new_user.save()
-        return liftDocId(saved), 201
+        user = liftDocId(saved)
+        del (user['password'])
+        return user, 201

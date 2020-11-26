@@ -10,6 +10,8 @@ yapf = "*"
 flask = "*"
 mongoengine = "*"
 flask-restful = "*"
+flask-compress = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.8"
