@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash
 from src.common.utils import updateDocFields
 
 from src.models.user import User
-from src.api.base import query, delete, get, AuthResource, authenticate
+from src.api.base import query, delete, get, authenticate
 
 # put
 put_args = reqparse.RequestParser()

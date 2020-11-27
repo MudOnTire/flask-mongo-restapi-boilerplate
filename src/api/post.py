@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse
 from src.common.utils import updateDocFields
 
 from src.models.post import Post
-from src.api.base import query, delete, get, authenticate
+from src.api.base import query, delete, get, update, authenticate
 
 # post
 post_args = reqparse.RequestParser()
@@ -22,38 +22,44 @@ put_args.add_argument("title", type=str)
 put_args.add_argument("content", type=str)
 
 
+# to populate referenced field or something
+def doc_modifier(doc):
+    obj = updateDocFields(doc)
+    db_author = doc.author
+    obj['author'] = updateDocFields(db_author)
+    return obj
+
+
 class PostsApi(Resource):
     # query
     def get(self):
-        return query(Post, self)
+        return query(Post, self, doc_modifier=doc_modifier)
 
     # create
-    def post(self):
+    @authenticate
+    def post(self, account):
         args = post_args.parse_args()
         new_post = Post(title=args['title'],
-                        content=args['content'])
+                        content=args['content'],
+                        author=account['id'])
         saved = new_post.save()
-        post = updateDocFields(saved)
+        post = doc_modifier(saved)
         return post, 201
 
     # delete
-    def delete(self):
+    @authenticate
+    def delete(self, account):
         return delete(Post, self)
 
 
 class PostApi(Resource):
     # update
-    def put(self, id):
+    @authenticate
+    def put(self, id, account):
         args = put_args.parse_args()
         target = Post.objects.with_id(id)
-        for key, value in args.items():
-            if value is not None:
-                target[key] = value
-        target['updatedTime'] = datetime.utcnow()
-        saved = target.save()
-        post = updateDocFields(saved)
-        return post, 200
+        return update(target, args, doc_modifier=doc_modifier)
 
     # get single
     def get(self, id):
-        return get(Post, id, self)
+        return get(Post, id, self, doc_modifier=doc_modifier)

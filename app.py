@@ -4,6 +4,7 @@ from flask_restful import Api
 from flask_cors import CORS
 from mongoengine import connect
 from src.api.user import UsersApi, UserApi
+from src.api.post import PostsApi, PostApi
 from src.api.auth import SignInApi, SignUpApi
 
 app = Flask(__name__)
@@ -18,6 +19,8 @@ api = Api(app)
 
 api.add_resource(UsersApi, '/api/users')
 api.add_resource(UserApi, '/api/users/<string:id>')
+api.add_resource(PostsApi, '/api/posts')
+api.add_resource(PostApi, '/api/posts/<string:id>')
 api.add_resource(SignInApi, '/api/signin')
 api.add_resource(SignUpApi, '/api/signup')
 

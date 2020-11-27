@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_restful import reqparse, abort, wraps, Resource
 from src.common.utils import updateDocFields, verifyToken
 from src.models.user import User
@@ -17,8 +18,8 @@ auth_args = reqparse.RequestParser()
 auth_args.add_argument('token', location='cookies')
 
 
-# query api
-def query(Model, resource):
+# query
+def query(Model, resource, doc_modifier=updateDocFields):
     args = get_args.parse_args()
     page_index = args['page_index'] or 1
     page_size = args['page_size'] or 10
@@ -27,7 +28,7 @@ def query(Model, resource):
     db_objs = Model.objects(deleted__ne=True).skip(
         (page_index - 1) * page_size).limit(page_size)
     for db_obj in db_objs:
-        obj = updateDocFields(db_obj)
+        obj = doc_modifier(db_obj)
         result.append(obj)
     res = {
         'list': result,
@@ -56,26 +57,37 @@ def delete(Model, resource):
 
 
 # get single
-def get(Model, id, resource):
+def get(Model, id, resource, doc_modifier=updateDocFields):
     target = Model.objects.with_id(id)
     if target is not None:
-        obj = updateDocFields(target)
+        obj = doc_modifier(target)
         return obj, 200
     else:
         return 404
 
+# update
+def update(target, args, doc_modifier=updateDocFields):
+    for key, value in args.items():
+        if value is not None:
+            target[key] = value
+    target['updatedTime'] = datetime.utcnow()
+    saved = target.save()
+    obj = doc_modifier(saved)
+    return obj, 200
+
 
 def basic_authentication(*args, **kwargs):
     args = auth_args.parse_args()
-    if 'token' in args:
-        token = args['token']
-        info = verifyToken(token)
-        if info is None:
-            return
-        if 'id' in info:
-            id = info['id']
-            db_user = User.objects.with_id(id)
-            return updateDocFields(db_user)
+    if 'token' not in args:
+        return
+    token = args['token']
+    info = verifyToken(token)
+    if info is None:
+        return
+    if 'id' in info:
+        id = info['id']
+        db_user = User.objects.with_id(id)
+        return updateDocFields(db_user)
 
 
 def authenticate(func):
