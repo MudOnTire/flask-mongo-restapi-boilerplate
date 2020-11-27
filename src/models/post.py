@@ -2,7 +2,7 @@ from mongoengine.queryset.base import NULLIFY
 from mongoengine.fields import StringField, ReferenceField, ListField
 from src.models.base import Base
 from src.models.user import User
-from src.models.comment import Comment
+# from src.models.comment import Comment
 
 
 class Post(Base):
@@ -10,4 +10,5 @@ class Post(Base):
     content = StringField(required=True)
     # when user deleted, author will be null
     author = ReferenceField(User, reverse_delete_rule=NULLIFY)
-    comments = ListField(ReferenceField(Comment))
+    # comments is not appropriate to be populated with posts, and should be fetched separately
+    # comments = ListField(ReferenceField(Comment, reverse_delete_rule=NULLIFY))
