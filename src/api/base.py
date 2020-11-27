@@ -1,5 +1,6 @@
-from flask_restful import reqparse
-from src.common.utils import updateDocFields
+from flask_restful import reqparse, abort, wraps, Resource
+from src.common.utils import updateDocFields, verifyToken
+from src.models.user import User
 
 # get
 get_args = reqparse.RequestParser()
@@ -10,6 +11,10 @@ get_args.add_argument("page_size", type=int)
 delete_args = reqparse.RequestParser()
 delete_args.add_argument('ids', action='append')
 delete_args.add_argument('soft', type=bool, default=False)
+
+# auth
+auth_args = reqparse.RequestParser()
+auth_args.add_argument('token', location='cookies')
 
 
 # query api
@@ -58,3 +63,35 @@ def get(Model, id, resource):
         return obj, 200
     else:
         return 404
+
+
+def basic_authentication(*args, **kwargs):
+    args = auth_args.parse_args()
+    if 'token' in args:
+        token = args['token']
+        info = verifyToken(token)
+        if info is None:
+            return
+        if 'id' in info:
+            id = info['id']
+            db_user = User.objects.with_id(id)
+            return updateDocFields(db_user)
+
+
+def authenticate(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not getattr(func, 'authenticated', True):
+            return func(*args, **kwargs)
+        user = basic_authentication()
+
+        if user:
+            kwargs['user'] = user
+            return func(*args, **kwargs)
+        abort(401)
+
+    return wrapper
+
+
+class AuthResource(Resource):
+    method_decorators = [authenticate]

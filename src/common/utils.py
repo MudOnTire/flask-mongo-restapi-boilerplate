@@ -1,11 +1,13 @@
 import json
 import jwt
-from datetime import datetime
+import datetime
 
 secret = 'Simple is better than complex'
 
 
 def updateDocFields(doc):
+    if doc is None:
+        return None
     dic = json.loads(doc.to_json())
     # id
     id = dic["_id"]["$oid"]
@@ -30,15 +32,15 @@ def createToken(id):
     token = jwt.encode(
         {
             'id': id,
-            'exp': datetime.utcnow() + datetime.timedelta(hours=24)
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
         },
         secret,
-        algorithm='HS256')
+        algorithm='HS256').decode('utf-8')
     return token
 
 
 def verifyToken(token):
     try:
-        return jwt.decode(token, secret, algorithm='HS256')
-    except jwt.ExpiredSignatureError:
-        print('token expired')
+        return jwt.decode(token, secret, algorithm=['HS256'])
+    except Exception as e:
+        print('verify token failed', e)

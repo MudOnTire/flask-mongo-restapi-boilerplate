@@ -4,20 +4,7 @@ from werkzeug.security import generate_password_hash
 from src.common.utils import updateDocFields
 
 from src.models.user import User
-from src.api.base import query, delete, get
-
-
-# post
-post_args = reqparse.RequestParser()
-post_args.add_argument("name",
-                       type=str,
-                       help="Username is required",
-                       required=True)
-post_args.add_argument("password",
-                       type=str,
-                       help="Password is required",
-                       required=True)
-post_args.add_argument("role", type=str, default="user")
+from src.api.base import query, delete, get, AuthResource
 
 # put
 put_args = reqparse.RequestParser()
@@ -25,28 +12,17 @@ put_args.add_argument("name", type=str)
 put_args.add_argument("password", type=str)
 put_args.add_argument("role", type=str)
 
-class UsersApi(Resource):
+class UsersApi(AuthResource):
     # query
     def get(self):
         return query(User, self)
-
-    # create
-    def post(self):
-        args = post_args.parse_args()
-        hashed_pass = generate_password_hash(args['password'])
-        new_user = User(name=args['name'],
-                        password=hashed_pass,
-                        role=args['role'])
-        saved = new_user.save()
-        user = updateDocFields(saved)
-        return user, 201
 
     # delete
     def delete(self):
         return delete(User, self)
 
 
-class UserApi(Resource):
+class UserApi(AuthResource):
     # update
     def put(self, id):
         args = put_args.parse_args()
@@ -63,5 +39,5 @@ class UserApi(Resource):
         return user, 200
 
     # get single
-    def get(self, id):
+    def get(self, user, id):
         return get(User, id, self)
