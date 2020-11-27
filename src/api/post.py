@@ -3,8 +3,7 @@ from flask_restful import Resource, reqparse
 from src.common.utils import updateDocFields
 
 from src.models.post import Post
-from src.models.user import User
-from src.api.base import query, delete, get
+from src.api.base import query, delete, get, authenticate
 
 # post
 post_args = reqparse.RequestParser()

@@ -83,10 +83,10 @@ def authenticate(func):
     def wrapper(*args, **kwargs):
         if not getattr(func, 'authenticated', True):
             return func(*args, **kwargs)
-        user = basic_authentication()
+        account = basic_authentication()
 
-        if user:
-            kwargs['user'] = user
+        if account:
+            kwargs['account'] = account
             return func(*args, **kwargs)
         abort(401)
 
