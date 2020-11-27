@@ -9,3 +9,8 @@ pipenv shell
 ```sh
 pipenv install
 ```
+
+## Run
+```sh
+python app.py
+```
